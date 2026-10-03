@@ -6,12 +6,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Conexão com o MySQL do WampServer
+// Conexão com o MySQL adaptada para variáveis de ambiente (Aiven/Render)
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',      // Usuário padrão do WampServer
-    password: '',      // Senha padrão é vazia no WampServer
-    database: 'hs_recruiting'
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'hs_recruiting',
+    port: process.env.DB_PORT || 3306,
+    ssl: process.env.DB_HOST ? { rejectUnauthorized: false } : false // Ativa SSL apenas quando estiver na nuvem
 });
 
 db.connect((err) => {
@@ -24,7 +26,6 @@ db.connect((err) => {
 
 // Rota para buscar os recrutas ordenados pelo ranking
 app.get('/api/players', (req, res) => {
-    // A instrução com ORDER BY entra exatamente nesta variável de SQL:
     const sql = `
         SELECT p.*, c.name_college AS college_committed, c.logo_url AS college_logo 
         FROM players p 
@@ -41,7 +42,7 @@ app.get('/api/players', (req, res) => {
     });
 });
 
-// Rota para buscar jogadores por ano de classe (ex: /api/players/class/2025)
+// Rota para buscar jogadores por ano de classe
 app.get('/api/players/class/:year', (req, res) => {
     const classYear = req.params.year;
     const sql = 'SELECT * FROM players WHERE class_year = ? ORDER BY rank_position ASC';
@@ -74,7 +75,8 @@ app.post('/api/players', (req, res) => {
     });
 });
 
-const PORT = 3000;
+// Porta dinâmica para o Render (com fallback para 3000 localmente)
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
