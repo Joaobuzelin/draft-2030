@@ -66,7 +66,7 @@ function renderTable(players) {
 // Busca os recrutas no Node.js
 async function fetchPlayers() {
     try {
-        const response = await fetch('http://localhost:3000/api/players');
+        const response = await fetch('https://draft-2030-api.onrender.com/api/players');
         allPlayers = await response.json();
         renderTable(allPlayers);
     } catch (error) {
@@ -154,7 +154,7 @@ if (addPlayerForm) {
         };
 
         try {
-            const response = await fetch('http://localhost:3000/api/players', {
+            const response = await fetch('https://draft-2030-api.onrender.com/api/players', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
